@@ -139,8 +139,7 @@ def compare(expected: str, guess: str) -> typing.List[str]:
 # compare("crape", "enter") -> "- _ _ _ -"
 # compare("ennui", "enter") -> "* * _ _ _"
 
-
-if __name__ == '__main__':
+def playGame():
     # the game word is 5 letters
     WORDLEN = 5
     # load the wordlist that we will select words from
@@ -153,7 +152,7 @@ if __name__ == '__main__':
     # function which expects a set
     GUESSWORD_WORDLIST = set(create_wordlist(
         GUESSWORD_LIST_FNAME, length=WORDLEN))
-
+    print(GUESSWORD_WORDLIST)
     # select a random word to start with
     WORD = random.choice(GAMEWORD_WORDLIST)
     GAME_WORD_LENGTH = len(WORD)
@@ -163,15 +162,15 @@ if __name__ == '__main__':
 
     # print the game instructions to the user
     print("""
-Guess words one at a time to guess the game word.
+    Guess words one at a time to guess the game word.
 
-A * character means a letter was guessed correctly
-in the correct position.
-A - character means a letter was guessed correctly,
-but in the incorrect position.
+    A * character means a letter was guessed correctly
+    in the correct position.
+    A - character means a letter was guessed correctly,
+    but in the incorrect position.
 
-To quit, press CTRL-C.
-""")
+    To quit, press CTRL-C.
+    """)
 
     # start of the user name interaction
     print("_ " * GAME_WORD_LENGTH)
@@ -195,6 +194,7 @@ To quit, press CTRL-C.
                 break
     except KeyboardInterrupt:
         print(f"""
-You quit - the correct answer was {WORD.upper()}
-and you took {NUM_GUESSES} guesses
-""")
+    You quit - the correct answer was {WORD.upper()}
+    and you took {NUM_GUESSES} guesses
+    """)
+    return NUM_GUESSES
