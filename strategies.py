@@ -109,7 +109,7 @@ def updateRanking(wordDict): # Update ranking (0 if letter not in word, 1 if in 
         wordDict.update({word : ranking})
     return wordDict
 
-def randomGuesserIsValid(word):
+def isValid(word):
     global stateSpace
     position = 1
     for letter in word: # Iterate through each letter in the word, check if this is a possible word
@@ -124,41 +124,64 @@ def randomGuesser(wordDict, guessNum):
     global stateSpace
     wordList = list(wordDict.keys()) # Get list of keys (words)
     random.shuffle(wordList) # Shuffle list for random aspect of search
-    updatedWordDict = wordDict.copy() # Copy to new list so words can be deleted, preventing duplicate guesses
-    count = 0
     for word in wordList:
         word = word.lower()
-        if randomGuesserIsValid(word): # Check if word is valid according to state space
-            del updatedWordDict[word.upper()]
-            return updatedWordDict, word.upper()
+        if isValid(word): # Check if word is valid according to state space
+            del wordDict[word.upper()]
+            return wordDict, word.upper()
         else:
-            del updatedWordDict[word.upper()]            
-        count += 1
+            del wordDict[word.upper()]            
 
 def useLowestScore2and3Guess(wordDict, guessNum):      
     wordList = sorted(wordDict.items(), key=lambda x:x[1]) # Sort the dictionary (converts it to a list)
     if guessNum == 1 or guessNum == 2: # If the second or the third guess...
-        word = wordList[0][0] # Get the word with the lowest score
-        wordList.pop(0) # Remove this word from the list
-        return dict(wordList), word # Cast the sorted list to a dictionary and also return the next guess
+        for wordTuple in wordList:
+            wordList.remove(wordTuple) # Remove this word from the list
+            if isValid(wordTuple[0].lower()):
+                return dict(wordList), wordTuple[0] # Cast the sorted list to a dictionary and also return the next guess
     else: 
-        word = wordList[len(wordList) - 1][0]
-        wordy = wordList.pop(len(wordList) - 1)
-        # print(wordy)
-        return dict(wordList), word
+        for wordTuple in reversed(wordList):
+            wordList.remove(wordTuple)
+            if isValid(wordTuple[0].lower()):
+                return dict(wordList), wordTuple[0]
 
 def useAverageScore2and3Guess(wordDict, guessNum):      
     wordList = sorted(wordDict.items(), key=lambda x:x[1]) # Sort the dictionary (converts it to a list)
     if guessNum == 1 or guessNum == 2: # If the second or the third guess...
-        word = wordList[int(len(wordList) / 2)][0] # Get the word with the lowest score
-        wordList.pop(int(len(wordList) / 2)) # Remove this word from the list
-        return dict(wordList), word # Cast the sorted list to a dictionary and also return the next guess
+        while True:
+            word = wordList[int(len(wordList) / 2)][0] # Get the word with the lowest score
+            wordList.pop(int(len(wordList) / 2)) # Remove this word from the list
+            if isValid(word.lower()):
+                return dict(wordList), word # Cast the sorted list to a dictionary and also return the next guess
     else: 
-        word = wordList[len(wordList) - 1][0]
-        wordy = wordList.pop(len(wordList) - 1)
-        # print(wordy)
-        return dict(wordList), word
- 
+        for wordTuple in reversed(wordList):
+            wordList.remove(wordTuple)
+            if isValid(wordTuple[0].lower()):
+                return dict(wordList), wordTuple[0]
+
+def useWordsNotGuessed(wordDict, guessNum):
+    global stateSpace
+    wordList = list(wordDict.keys()) # Get list of keys (words)
+    random.shuffle(wordList) # Shuffle list for random aspect of search
+    if guessNum == 1 or guessNum == 2:
+        for word in wordList:
+            notGuessed = True
+            for letter in word:
+                state = stateSpace.get(letter.lower())
+                if state[0] == 2:
+                    notGuessed = False
+                    break
+            if notGuessed and isValid(word.lower()):
+                del wordDict[word.upper()]
+                return wordDict, word
+    else:
+        wordList = sorted(wordDict.items(), key=lambda x:x[1]) # Sort the dictionary (converts it to a list)
+        for wordTuple in reversed(wordList):
+            wordList.remove(wordTuple)
+            if isValid(wordTuple[0].lower()):
+                return dict(wordList), wordTuple[0]
+        return
+
 
 def runStrategy (strategy, strategyName, iterations):
     print("Running", strategyName, "Algorithm with", iterations, "game iterations. This may take a while...")
@@ -172,6 +195,7 @@ def runStrategy (strategy, strategyName, iterations):
     print("    Time taken for algorithm to run: " + str(totalTime) + " secs")
     print("    This means each game took, on average, " + str(totalTime / iterations) + " secs to run")
 
-# runStrategy(randomGuesser, "RandomGuesser", 1000)
-# runStrategy(useLowestScore2and3Guess, "Lowest Score for 2nd & 3rd Guesses", 15)
-runStrategy(useAverageScore2and3Guess, "Average Score for 2nd & 3rd Guesses", 15)
+# runStrategy(randomGuesser, "RandomGuesser", 200)
+# runStrategy(useLowestScore2and3Guess, "Lowest Score for 2nd & 3rd Guesses", 100)
+# runStrategy(useAverageScore2and3Guess, "Average Score for 2nd & 3rd Guesses", 100)
+# runStrategy(useWordsNotGuessed, "Guess Words with letters not in correct spot for 2nd & 3rd Guesses", 100)
