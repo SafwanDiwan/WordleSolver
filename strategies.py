@@ -1,3 +1,4 @@
+import time
 from game import *
 import random
 
@@ -121,11 +122,16 @@ def randomGuesser(wordList):
 
 # guesser = randomGuesser
 iterations = 1000
-print("Running RandomGuesser Algorithm with", iterations, "iterations. This may take a while...")
+print("Running RandomGuesser Algorithm with", iterations, "game iterations. This may take a while...")
 tries = 0
+startTime = time.perf_counter()
 for x in range (iterations):
     tries += playGame(randomGuesser)
-print("Average Guesses for RandomGuesser:", (tries / iterations))
+endTime = time.perf_counter()
+totalTime = endTime - startTime
+print("    Average Guesses for RandomGuesser:", (tries / iterations))
+print("    Time taken for algorithm to run:", totalTime, "secs")
+print("    This means each game took, on average,", totalTime / iterations, "secs to run")
 # resetStateSpace()
 # updateStateSpace("apale", ['*', '_', '_', '-', '_'])
 # print()
