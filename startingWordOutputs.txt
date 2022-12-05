@@ -1,0 +1,35 @@
+Starting Word: TARES
+Running RandomGuesser Algorithm with 100 game iterations. This may take a while...
+    Average Guesses for RandomGuesser: 5.56
+    Time taken for algorithm to run: 12.7943939 secs
+    This means each game took, on average, 0.127943939 secs to run
+Running Lowest Score for 2nd & 3rd Guesses Algorithm with 100 game iterations. This may take a while...
+    Average Guesses for Lowest Score for 2nd & 3rd Guesses: 6.12
+    Time taken for algorithm to run: 20.5927593 secs
+    This means each game took, on average, 0.20592759300000002 secs to run
+Running Average Score for 2nd & 3rd Guesses Algorithm with 100 game iterations. This may take a while...
+    Average Guesses for Average Score for 2nd & 3rd Guesses: 6.03
+    Time taken for algorithm to run: 26.492098 secs
+    This means each game took, on average, 0.26492098 secs to run
+Running Guess Words with letters not in correct spot for 2nd & 3rd Guesses Algorithm with 100 game iterations. This may take a while...
+    Average Guesses for Guess Words with letters not in correct spot for 2nd & 3rd Guesses: 5.91
+    Time taken for algorithm to run: 48.02357000000001 secs
+    This means each game took, on average, 0.48023570000000004 secs to run
+
+
+STARTING WORD: SALET
+Running RandomGuesser Algorithm with 100 game iterations. This may take a while...
+    Average Guesses for RandomGuesser: 5.8
+    Time taken for algorithm to run: 9.962810600000001 secs
+    This means each game took, on average, 0.09962810600000001 secs to run
+Running Lowest Score for 2nd & 3rd Guesses Algorithm with 100 game iterations. This may take a while...
+    Average Guesses for Lowest Score for 2nd & 3rd Guesses: 6.09
+    This means each game took, on average, 0.146681578 secs to run
+Running Average Score for 2nd & 3rd Guesses Algorithm with 100 game iterations. This may take a while...
+    Average Guesses for Average Score for 2nd & 3rd Guesses: 5.97
+    Time taken for algorithm to run: 36.1541723 secs
+    This means each game took, on average, 0.361541723 secs to run
+Running Guess Words with letters not in correct spot for 2nd & 3rd Guesses Algorithm with 100 game iterations. This may take a while...
+    Average Guesses for Guess Words with letters not in correct spot for 2nd & 3rd Guesses: 6.14
+    Time taken for algorithm to run: 56.9548359 secs
+    This means each game took, on average, 0.569548359 secs to run

@@ -134,16 +134,17 @@ def randomGuesser(wordDict, guessNum):
 
 def useLowestScore2and3Guess(wordDict, guessNum):      
     wordList = sorted(wordDict.items(), key=lambda x:x[1]) # Sort the dictionary (converts it to a list)
+    updatedWordList = wordList.copy()
     if guessNum == 1 or guessNum == 2: # If the second or the third guess...
         for wordTuple in wordList:
-            wordList.remove(wordTuple) # Remove this word from the list
+            updatedWordList.remove(wordTuple) # Remove this word from the list
             if isValid(wordTuple[0].lower()):
-                return dict(wordList), wordTuple[0] # Cast the sorted list to a dictionary and also return the next guess
+                return dict(updatedWordList), wordTuple[0] # Cast the sorted list to a dictionary and also return the next guess
     else: 
         for wordTuple in reversed(wordList): # Get highest score words
-            wordList.remove(wordTuple)
+            updatedWordList.remove(wordTuple)
             if isValid(wordTuple[0].lower()):
-                return dict(wordList), wordTuple[0]
+                return dict(updatedWordList), wordTuple[0]
 
 def useAverageScore2and3Guess(wordDict, guessNum):      
     wordList = sorted(wordDict.items(), key=lambda x:x[1]) # Sort the dictionary (converts it to a list)
@@ -154,10 +155,11 @@ def useAverageScore2and3Guess(wordDict, guessNum):
             if isValid(word.lower()):
                 return dict(wordList), word # Cast the sorted list to a dictionary and also return the next guess
     else: 
+        updatedWordList = wordList.copy()
         for wordTuple in reversed(wordList): # Get highest score words
-            wordList.remove(wordTuple)
+            updatedWordList.remove(wordTuple)
             if isValid(wordTuple[0].lower()):
-                return dict(wordList), wordTuple[0]
+                return dict(updatedWordList), wordTuple[0]
 
 def useLettersInIncorrectSpots(wordDict, guessNum):
     global stateSpace
@@ -176,10 +178,11 @@ def useLettersInIncorrectSpots(wordDict, guessNum):
                 return wordDict, word
     else:
         wordList = sorted(wordDict.items(), key=lambda x:x[1]) # Sort the dictionary (converts it to a list)
+        updatedWordList = wordList.copy()
         for wordTuple in reversed(wordList): # Get highest score words
-            wordList.remove(wordTuple)
+            updatedWordList.remove(wordTuple)
             if isValid(wordTuple[0].lower()):
-                return dict(wordList), wordTuple[0]
+                return dict(updatedWordList), wordTuple[0]
         return
 
 
