@@ -118,11 +118,12 @@ def updateRanking(wordDict): # Function to call the correct ranking function
         return updateStateSpaceRanking(wordDict)
     if (rankingType == 2):
         return updateFrequencyRanking(wordDict)
+    if (rankingType == 3):
+        return updateEntropyRanking(wordDict)
 
 def updateStateSpaceRanking(wordDict): # Update ranking (0 if letter not in word, 1 if in word but in incorrect position, 2 if in word and correct position)
     global stateSpace
     for word in wordDict:
-        print(word)
         ranking = 0
         position = 1
         for letter in word:
@@ -156,6 +157,33 @@ def updateFrequencyRanking(wordDict):
         wordDict.update({word : ranking})
     return wordDict
 
+def updateEntropyRanking(wordDict):
+    global letterFreq # Use letterFreq dictionary for entropy too!
+    resetLetterFreq()
+    for word in wordDict: # Updates the letterFreq dictionary with updated frequency values
+        position = 0
+        for letter in word:
+            letter = letter.lower()
+            frequencyList = letterFreq.get(letter)
+            dupStr = word.split(letter)
+            if frequencyList != None and not (letter in dupStr):
+                frequency = frequencyList[position] + 1
+                frequencyList[position] = frequency
+                letterFreq.update({letter : frequencyList})
+            position += 1
+    for letter in letterFreq:
+        frequencyList = letterFreq.get(letter)
+        frequencyList[:] = [x / len(wordDict) for x in frequencyList]
+    for word in wordDict:
+        ranking = 0
+        position = 0
+        for letter in word:
+            letter = letter.lower()
+            frequencyList = letterFreq.get(letter)
+            ranking += frequencyList[position] * (1 - frequencyList[position])
+        wordDict.update({word : ranking})
+    return wordDict
+
 def isValid(word): # Check if word is valid (Wordle hard mode verification)
     global stateSpace
     position = 1
@@ -168,8 +196,6 @@ def isValid(word): # Check if word is valid (Wordle hard mode verification)
 
 def randomGuesser(wordDict, guessNum): # Guess random words that are valid based on previous guess info
     global stateSpace
-    global rankingType
-    rankingType = 0
     wordList = list(wordDict.keys()) # Get list of keys (words)
     random.shuffle(wordList) # Shuffle list for random aspect of search
     for word in wordList:
@@ -204,17 +230,13 @@ def getLowestRanking(wordDict):
             if isValid(wordTuple[0].lower()):
                 return dict(updatedWordList), wordTuple[0] # Cast the sorted list to a dictionary and also return the next guess
 
-def useLowestScore2and3Guess(wordDict, guessNum): 
-    global rankingType
-    rankingType = 0  
+def useLowestScore2and3Guess(wordDict, guessNum):  
     if guessNum == 1 or guessNum == 2: # If the second or the third guess...
         return getLowestRanking(wordDict)
     else: 
         return getHighestRanking(wordDict)
 
 def useAverageScore2and3Guess(wordDict, guessNum):      
-    global rankingType
-    rankingType = 0 
     if guessNum == 1 or guessNum == 2: # If the second or the third guess...
         return getAverageRanking(wordDict)
     else: 
@@ -222,8 +244,6 @@ def useAverageScore2and3Guess(wordDict, guessNum):
 
 def useLettersInIncorrectSpots(wordDict, guessNum):
     global stateSpace
-    global rankingType
-    rankingType = 0  
     wordList = list(wordDict.keys()) # Get list of keys (words)
     random.shuffle(wordList) # Shuffle list for random aspect of search
     if guessNum == 1 or guessNum == 2:
@@ -241,16 +261,21 @@ def useLettersInIncorrectSpots(wordDict, guessNum):
         return getHighestRanking(wordDict)
 
 def useAverageFrequencyToGuess(wordDict, guessNum):
-    global rankingType
-    rankingType = 2
     return getAverageRanking(wordDict)
-    # if guessNum == 2 or guessNum == 3:
-    #     return getAverageRanking(wordDict)
-    # else:
-    #     return getHighestRanking(wordDict)
 
+def useAverageEntropyToGuess(wordDict, guessNum):
+    return getAverageRanking(wordDict)
 
 def runStrategy (strategy, strategyName, iterations):
+    global rankingType
+    if strategy == randomGuesser:
+        rankingType = 0
+    if strategy == useLowestScore2and3Guess or strategy == useAverageScore2and3Guess or strategy == useLettersInIncorrectSpots:
+        rankingType = 1
+    elif strategy == useAverageFrequencyToGuess:
+        rankingType = 2
+    elif strategy == useAverageEntropyToGuess:
+        rankingType = 3
     print("Running", strategyName, "Algorithm with", iterations, "game iterations. This may take a while...")
     tries = 0
     startTime = time.perf_counter()
@@ -270,8 +295,9 @@ def runStrategy (strategy, strategyName, iterations):
     print("    Time taken for algorithm to run: " + str(totalTime) + " secs")
     print("    This means each game took, on average, " + str(totalTime / iterations) + " secs to run")
 
-# runStrategy(randomGuesser, "RandomGuesser", 100)
-# runStrategy(useLowestScore2and3Guess, "Lowest Score for 2nd & 3rd Guesses", 10)
-# runStrategy(useAverageScore2and3Guess, "Average Score for 2nd & 3rd Guesses", 10)
-# runStrategy(useLettersInIncorrectSpots, "Guess Words with letters not in correct spot for 2nd & 3rd Guesses", 10)
-runStrategy(useAverageFrequencyToGuess, "AverageFrequencyGuesser", 10)
+runStrategy(randomGuesser, "RandomGuesser", 100)
+runStrategy(useLowestScore2and3Guess, "Lowest Score for 2nd & 3rd Guesses", 1)
+runStrategy(useAverageScore2and3Guess, "Average Score for 2nd & 3rd Guesses", 1)
+runStrategy(useLettersInIncorrectSpots, "Guess Words with letters not in correct spot for 2nd & 3rd Guesses", 1)
+runStrategy(useAverageFrequencyToGuess, "AverageFrequencyGuesser", 1)
+runStrategy(useAverageEntropyToGuess, "AverageEntropyGuesser", 1)
