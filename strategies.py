@@ -120,6 +120,8 @@ def updateRanking(wordDict): # Function to call the correct ranking function
         return updateFrequencyRanking(wordDict)
     if (rankingType == 3):
         return updateEntropyRanking(wordDict)
+    if (rankingType == 4):
+        return updateStateSpaceAndEntropyRanking(wordDict)
 
 def updateStateSpaceRanking(wordDict): # Update ranking (0 if letter not in word, 1 if in word but in incorrect position, 2 if in word and correct position)
     global stateSpace
@@ -127,10 +129,12 @@ def updateStateSpaceRanking(wordDict): # Update ranking (0 if letter not in word
         ranking = 0
         position = 1
         for letter in word:
-            letterState = stateSpace.get(letter.lower())
-            ranking += letterState[position]
+            dupStr = word.split(letter)
+            if letter not in dupStr:
+                letterState = stateSpace.get(letter.lower())
+                ranking += letterState[position]
         position += 1
-        wordDict.update({word : ranking})
+        wordDict.update({word : (ranking / 10)})
     return wordDict
 
 def updateFrequencyRanking(wordDict):
@@ -142,7 +146,7 @@ def updateFrequencyRanking(wordDict):
             letter = letter.lower()
             frequencyList = letterFreq.get(letter)
             dupStr = word.split(letter)
-            if frequencyList != None and not (letter in dupStr):
+            if frequencyList != None and (letter not in dupStr):
                 frequency = frequencyList[position] + 1
                 frequencyList[position] = frequency
                 letterFreq.update({letter : frequencyList})
@@ -184,6 +188,24 @@ def updateEntropyRanking(wordDict):
         wordDict.update({word : ranking})
     return wordDict
 
+def updateStateSpaceAndEntropyRanking(wordDict):
+    wordDict2 = wordDict.copy()
+    stateSpaceWordDict = updateStateSpaceRanking(wordDict)
+    entropyWordDict = updateEntropyRanking(wordDict2)
+    newDict = {}
+    for word in stateSpaceWordDict:
+        ranking1 = stateSpaceWordDict.get(word)
+        ranking2 = entropyWordDict.get(word)
+        if ranking2 != None:
+            avgRanking = (ranking1 + ranking2) / 2
+            newDict.update({word : avgRanking})
+        else:
+            newDict.update({word : ranking1})
+    for word in entropyWordDict:
+        if word not in stateSpaceWordDict:
+            newDict.update({word : entropyWordDict.get(word)})
+    return newDict
+
 def isValid(word): # Check if word is valid (Wordle hard mode verification)
     global stateSpace
     position = 1
@@ -210,9 +232,9 @@ def getHighestRanking(wordDict):
     wordList = sorted(wordDict.items(), key=lambda x:x[1]) # Sort the dictionary (converts it to a list)
     updatedWordList = wordList.copy()
     for wordTuple in reversed(wordList): # Get highest score words
-            updatedWordList.remove(wordTuple)
-            if isValid(wordTuple[0].lower()):
-                return dict(updatedWordList), wordTuple[0]
+        updatedWordList.remove(wordTuple)
+        if isValid(wordTuple[0].lower()):
+            return dict(updatedWordList), wordTuple[0]
 
 def getAverageRanking(wordDict):
     wordList = sorted(wordDict.items(), key=lambda x:x[1]) # Sort the dictionary (converts it to a list)
@@ -266,6 +288,10 @@ def useAverageFrequencyToGuess(wordDict, guessNum):
 def useAverageEntropyToGuess(wordDict, guessNum):
     return getAverageRanking(wordDict)
 
+def useHybridEntropyAndStateSpaceRanking(wordDict, guessNum):
+    return getHighestRanking(wordDict)
+
+
 def runStrategy (strategy, strategyName, iterations):
     global rankingType
     if strategy == randomGuesser:
@@ -276,6 +302,8 @@ def runStrategy (strategy, strategyName, iterations):
         rankingType = 2
     elif strategy == useAverageEntropyToGuess:
         rankingType = 3
+    elif strategy == useHybridEntropyAndStateSpaceRanking:
+        rankingType = 4
     print("Running", strategyName, "Algorithm with", iterations, "game iterations. This may take a while...")
     tries = 0
     startTime = time.perf_counter()
@@ -284,7 +312,7 @@ def runStrategy (strategy, strategyName, iterations):
     for x in range (iterations):
         guesses = playGame(strategy)
         tries += guesses
-        if guesses >= 6:
+        if guesses <= 6:
             underOrEqualTo6 += 1
         else:
             over6 += 1
@@ -295,9 +323,10 @@ def runStrategy (strategy, strategyName, iterations):
     print("    Time taken for algorithm to run: " + str(totalTime) + " secs")
     print("    This means each game took, on average, " + str(totalTime / iterations) + " secs to run")
 
-runStrategy(randomGuesser, "RandomGuesser", 100)
-runStrategy(useLowestScore2and3Guess, "Lowest Score for 2nd & 3rd Guesses", 1)
-runStrategy(useAverageScore2and3Guess, "Average Score for 2nd & 3rd Guesses", 1)
-runStrategy(useLettersInIncorrectSpots, "Guess Words with letters not in correct spot for 2nd & 3rd Guesses", 1)
-runStrategy(useAverageFrequencyToGuess, "AverageFrequencyGuesser", 1)
-runStrategy(useAverageEntropyToGuess, "AverageEntropyGuesser", 1)
+runStrategy(randomGuesser, "RandomGuesser", 200)
+# runStrategy(useLowestScore2and3Guess, "Lowest Score for 2nd & 3rd Guesses", 100)
+# runStrategy(useAverageScore2and3Guess, "Average Score for 2nd & 3rd Guesses", 100)
+# runStrategy(useLettersInIncorrectSpots, "Guess Words with letters not in correct spot for 2nd & 3rd Guesses", 100)
+# runStrategy(useAverageFrequencyToGuess, "AverageFrequencyGuesser", 100)
+# runStrategy(useAverageEntropyToGuess, "AverageEntropyGuesser", 100)
+runStrategy(useHybridEntropyAndStateSpaceRanking, "HybridEntropyAndStateSpaceGuesser", 200)
