@@ -32,30 +32,30 @@ def resetLetterFreq(): # Function to reset letter frequency count. Is run after 
 
 def updateStateSpace(guess, result): # Update state space as a result of each guess.
     global stateSpace
-    count = 0
+    index = 0 # Stores index we are at in the result string
     for letter in guess:
-        placement = stateSpace.get(letter)
-        if result[count] == '*': # If letter is in word and in correct position
+        possibleLetterLoc = stateSpace.get(letter)
+        if result[index] == '*': # If letter is in word and in correct position
             for value in stateSpace: # Loop through state space and update all values to 0
                 if value != letter: # Makes sure that the value that we are looking at isn't changed to 0
                     holder = stateSpace.get(value)
-                    holder[count+1] = 0
+                    holder[index+1] = 0
                     stateSpace.update({value : holder})
-            placement[count+1] = 2
-        elif result[count] == '-': # If letter in word but not in correct position
-            placement[count+1] = 0
-        elif result[count] == "_": # If letter is not in word
-            compareString = guess[:count] # This line and next line accounts for duplicate letter edge case
+            possibleLetterLoc[index+1] = 2
+        elif result[index] == '-': # If letter in word but not in correct position
+            possibleLetterLoc[index+1] = 0
+        elif result[index] == "_": # If letter is not in word
+            compareString = guess[:index] # This line and next line accounts for duplicate letter edge case
             if letter in compareString:
-                placement[count+1] = 0
+                possibleLetterLoc[index+1] = 0
             else:
-                placement = [0, 0, 0, 0, 0, 0]
-        placement[0] = 1
-        stateSpace.update({letter : placement})
-        count += 1
+                possibleLetterLoc = [0, 0, 0, 0, 0, 0]
+        possibleLetterLoc[0] = 1 # Set the first index in the possibleLetterLoc array to 1 to indicate this letter has been guessed
+        stateSpace.update({letter : possibleLetterLoc})
+        index += 1
     return
 
-def convertToRanking(wordList): # Convert generated list of words to dictionary so that rankings can also be included
+def createRankingDict(wordList): # Convert generated list of words to dictionary so that rankings can also be included
     wordDict = {}
     for word in wordList:
         wordDict.update({word : 0})
@@ -65,8 +65,7 @@ def playGame(wordGen):
     resetStateSpace()
     firstGuess = True
     # load the wordlist that we will select words from for the wordle game
-    GAMEWORD_WORDLIST = create_wordlist(
-        GAMEWORD_LIST_FNAME, length=WORDLEN)
+    GAMEWORD_WORDLIST = create_wordlist(GAMEWORD_LIST_FNAME, length=WORDLEN)
 
     # select a random word to start with
     WORD = random.choice(GAMEWORD_WORDLIST)
@@ -76,15 +75,14 @@ def playGame(wordGen):
     # keep track of some game state
     NUM_GUESSES = 0
 
-    # A * character means a letter was guessed correctly
-    # in the correct position.
-    # A - character means a letter was guessed correctly,
-    # but in the incorrect position.
+    # A * character means a letter was guessed correctly in the correct position.
+    # A - character means a letter was guessed correctly, but in the incorrect position.
+    # A _ character means a letter was guessed incorrectly.
 
     # start of the user name interaction
     # print("_ " * GAME_WORD_LENGTH)
     # we use a continuous loop, since there could be a number of different exit conditions from the game if we want to spruce it up.
-    wordDict = convertToRanking(create_wordlist(GUESSWORD_LIST_FNAME, length=WORDLEN))
+    wordDict = createRankingDict(GAMEWORD_WORDLIST)
     try:
         while True:
             # get the user to guess something
@@ -323,10 +321,14 @@ def runStrategy (strategy, strategyName, iterations):
     print("    Time taken for algorithm to run: " + str(totalTime) + " secs")
     print("    This means each game took, on average, " + str(totalTime / iterations) + " secs to run")
 
-runStrategy(randomGuesser, "RandomGuesser", 200)
-# runStrategy(useLowestScore2and3Guess, "Lowest Score for 2nd & 3rd Guesses", 100)
-# runStrategy(useAverageScore2and3Guess, "Average Score for 2nd & 3rd Guesses", 100)
-# runStrategy(useLettersInIncorrectSpots, "Guess Words with letters not in correct spot for 2nd & 3rd Guesses", 100)
-# runStrategy(useAverageFrequencyToGuess, "AverageFrequencyGuesser", 100)
-# runStrategy(useAverageEntropyToGuess, "AverageEntropyGuesser", 100)
-runStrategy(useHybridEntropyAndStateSpaceRanking, "HybridEntropyAndStateSpaceGuesser", 200)
+def main():
+    runStrategy(randomGuesser, "RandomGuesser", 200)
+    # runStrategy(useLowestScore2and3Guess, "Lowest Score for 2nd & 3rd Guesses", 100)
+    # runStrategy(useAverageScore2and3Guess, "Average Score for 2nd & 3rd Guesses", 100)
+    # runStrategy(useLettersInIncorrectSpots, "Guess Words with letters not in correct spot for 2nd & 3rd Guesses", 100)
+    # runStrategy(useAverageFrequencyToGuess, "AverageFrequencyGuesser", 100)
+    # runStrategy(useAverageEntropyToGuess, "AverageEntropyGuesser", 100)
+    runStrategy(useHybridEntropyAndStateSpaceRanking, "HybridEntropyAndStateSpaceGuesser", 50)
+
+if __name__ == '__main__':
+    main()
