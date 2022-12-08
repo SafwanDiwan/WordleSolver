@@ -82,7 +82,7 @@ def playGame(wordGen):
     # start of the user name interaction
     # print("_ " * GAME_WORD_LENGTH)
     # we use a continuous loop, since there could be a number of different exit conditions from the game if we want to spruce it up.
-    wordDict = createRankingDict(GAMEWORD_WORDLIST)
+    wordDict = createRankingDict(create_wordlist(GUESSWORD_LIST_FNAME, length=WORDLEN))
     try:
         while True:
             # get the user to guess something
@@ -324,7 +324,7 @@ def runStrategy (strategy, strategyName, iterations):
     print("    This means each game took, on average, " + str(totalTime / iterations) + " secs to run")
 
 def main():
-    runStrategy(randomGuesser, "RandomGuesser", 200)
+    runStrategy(randomGuesser, "RandomGuesser", 100)
     runStrategy(useLowestScore2and3Guess, "Lowest Score for 2nd & 3rd Guesses", 100)
     runStrategy(useAverageScore2and3Guess, "Average Score for 2nd & 3rd Guesses", 100)
     runStrategy(useLettersInIncorrectSpots, "Guess Words with letters not in correct spot for 2nd & 3rd Guesses", 100)
