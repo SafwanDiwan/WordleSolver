@@ -67,7 +67,7 @@ def playGame(wordGen):
     # load the wordlist that we will select words from for the wordle game
     GAMEWORD_WORDLIST = create_wordlist(GAMEWORD_LIST_FNAME, length=WORDLEN)
 
-    # select a random word to start with
+    # select a random word to be the Wordle!
     WORD = random.choice(GAMEWORD_WORDLIST)
     # WORD = "WHARF"
     # GAME_WORD_LENGTH = len(WORD)
@@ -82,7 +82,7 @@ def playGame(wordGen):
     # start of the user name interaction
     # print("_ " * GAME_WORD_LENGTH)
     # we use a continuous loop, since there could be a number of different exit conditions from the game if we want to spruce it up.
-    wordDict = createRankingDict(GAMEWORD_WORDLIST)
+    wordDict = createRankingDict(create_wordlist(GUESSWORD_LIST_FNAME, length=WORDLEN))
     try:
         while True:
             # get the user to guess something
@@ -94,12 +94,13 @@ def playGame(wordGen):
             NUM_GUESSES += 1
             # display the guess when compared against the game word
             result = compare(expected=WORD, guess=GUESS)
+            # print(f"Guess for step {NUM_GUESSES}: {GUESS}")
             updateStateSpace(GUESS.lower(), result)
             wordDict = updateRanking(wordDict)
             # print(" ".join(result))
 
             if WORD == GUESS:
-                # print(f"You won! It took you {NUM_GUESSES} guesses.")
+                # print(f"You won! It took you {NUM_GUESSES} guesses. The word was {WORD.upper()}")
                 break
     except KeyboardInterrupt:
         print(f"""
@@ -318,17 +319,18 @@ def runStrategy (strategy, strategyName, iterations):
     totalTime = endTime - startTime
     print("    Average Guesses for "+ str(strategyName) + ": " + str(tries / iterations))
     print("    Number of Games with guess count under or equal to 6: "+ str(underOrEqualTo6) + ". With guess count over 6: " + str(over6))
+    print("    " + str(strategyName) + " won the game " + str(underOrEqualTo6 / iterations * 100) + "% of the time!")
     print("    Time taken for algorithm to run: " + str(totalTime) + " secs")
     print("    This means each game took, on average, " + str(totalTime / iterations) + " secs to run")
 
 def main():
-    runStrategy(randomGuesser, "RandomGuesser", 200)
-    # runStrategy(useLowestScore2and3Guess, "Lowest Score for 2nd & 3rd Guesses", 100)
-    # runStrategy(useAverageScore2and3Guess, "Average Score for 2nd & 3rd Guesses", 100)
-    # runStrategy(useLettersInIncorrectSpots, "Guess Words with letters not in correct spot for 2nd & 3rd Guesses", 100)
-    # runStrategy(useAverageFrequencyToGuess, "AverageFrequencyGuesser", 100)
-    # runStrategy(useAverageEntropyToGuess, "AverageEntropyGuesser", 100)
-    runStrategy(useHybridEntropyAndStateSpaceRanking, "HybridEntropyAndStateSpaceGuesser", 50)
+    runStrategy(randomGuesser, "RandomGuesser", 100)
+    runStrategy(useLowestScore2and3Guess, "Lowest Score for 2nd & 3rd Guesses", 100)
+    runStrategy(useAverageScore2and3Guess, "Average Score for 2nd & 3rd Guesses", 100)
+    runStrategy(useLettersInIncorrectSpots, "Guess Words with letters not in correct spot for 2nd & 3rd Guesses", 100)
+    runStrategy(useAverageFrequencyToGuess, "AverageFrequencyGuesser", 100)
+    runStrategy(useAverageEntropyToGuess, "AverageEntropyGuesser", 100)
+    runStrategy(useHybridEntropyAndStateSpaceRanking, "HybridEntropyAndStateSpaceGuesser", 100)
 
 if __name__ == '__main__':
     main()
