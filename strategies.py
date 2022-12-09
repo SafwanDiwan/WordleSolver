@@ -1,6 +1,7 @@
 import time
 from game import *
 import random
+from copy import deepcopy
 
 WORDLEN = 5 # The length of the correct answer and guessed words
 INITGUESS = "TARES" # The first guess
@@ -55,6 +56,31 @@ def updateStateSpace(guess, result): # Update state space as a result of each gu
         index += 1
     return
 
+def updateLocalStateSpace(stateSpace, guess, result): # Update state space as a result of each guess.
+    index = 0 # Stores index we are at in the result string
+    guess = guess.lower()
+    for letter in guess:
+        possibleLetterLoc = stateSpace.get(letter)
+        if result[index] == '*': # If letter is in word and in correct position
+            for value in stateSpace: # Loop through state space and update all values to 0
+                if value != letter: # Makes sure that the value that we are looking at isn't changed to 0
+                    holder = stateSpace.get(value)
+                    holder[index+1] = 0
+                    stateSpace.update({value : holder})
+            possibleLetterLoc[index+1] = 2
+        elif result[index] == '-': # If letter in word but not in correct position
+            possibleLetterLoc[index+1] = 0
+        elif result[index] == "_": # If letter is not in word
+            compareString = guess[:index] # This line and next line accounts for duplicate letter edge case
+            if letter in compareString:
+                possibleLetterLoc[index+1] = 0
+            else:
+                possibleLetterLoc = [0, 0, 0, 0, 0, 0]
+        possibleLetterLoc[0] = 1 # Set the first index in the possibleLetterLoc array to 1 to indicate this letter has been guessed
+        stateSpace.update({letter : possibleLetterLoc})
+        index += 1
+    return stateSpace
+
 def createRankingDict(wordList): # Convert generated list of words to dictionary so that rankings can also be included
     wordDict = {}
     for word in wordList:
@@ -69,6 +95,7 @@ def playGame(wordGen):
 
     # select a random word to be the Wordle!
     WORD = random.choice(GAMEWORD_WORDLIST)
+    print("Correct Word:", WORD)
     # WORD = "WHARF"
     # GAME_WORD_LENGTH = len(WORD)
 
@@ -94,13 +121,13 @@ def playGame(wordGen):
             NUM_GUESSES += 1
             # display the guess when compared against the game word
             result = compare(expected=WORD, guess=GUESS)
-            # print(f"Guess for step {NUM_GUESSES}: {GUESS}")
+            print(f"Guess for step {NUM_GUESSES}: {GUESS}")
             updateStateSpace(GUESS.lower(), result)
             wordDict = updateRanking(wordDict)
             # print(" ".join(result))
 
             if WORD == GUESS:
-                # print(f"You won! It took you {NUM_GUESSES} guesses. The word was {WORD.upper()}")
+                print(f"You won! It took you {NUM_GUESSES} guesses. The word was {WORD.upper()}")
                 break
     except KeyboardInterrupt:
         print(f"""
@@ -111,7 +138,7 @@ def playGame(wordGen):
 
 def updateRanking(wordDict): # Function to call the correct ranking function
     global rankingType
-    wordDict = updateWordDict(wordDict)
+    wordDict = updateWordDict(wordDict, None, False)
     if (rankingType == 0):
         return wordDict
     if (rankingType == 1):
@@ -125,14 +152,20 @@ def updateRanking(wordDict): # Function to call the correct ranking function
     if (rankingType == 5):
         return wordDict
 
-def updateWordDict(wordDict): # Delete words from the word dictionary with letters that are in invalid spots
-    dict_copy = wordDict.copy()
+def updateWordDict(wordDict, stateSpaceCopy, isCopy): # Delete words from the word dictionary with letters that are in invalid spots
+    global stateSpace
+    dict_copy = deepcopy(wordDict)
     for word in dict_copy.keys():
         wordIndex = 1
         for letter in word:
-            if stateSpace.get(letter.lower())[wordIndex] == 0:
-                del wordDict[word]
-                break
+            if isCopy:
+                if stateSpaceCopy.get(letter.lower())[wordIndex] == 0:
+                    del wordDict[word]
+                    break
+            else:
+                if stateSpace.get(letter.lower())[wordIndex] == 0:
+                    del wordDict[word]
+                    break
             wordIndex += 1
     return wordDict
 
@@ -195,11 +228,10 @@ def updateEntropyRanking(wordDict):
             frequencyList = letterFreq.get(letter)
             ranking += frequencyList[position] * (1 - frequencyList[position])
         wordDict.update({word : ranking})
-    # print(letterFreq)
     return wordDict
 
 def updateStateSpaceAndEntropyRanking(wordDict):
-    wordDict2 = wordDict.copy()
+    wordDict2 = deepcopy(wordDict)
     stateSpaceWordDict = updateStateSpaceRanking(wordDict)
     entropyWordDict = updateEntropyRanking(wordDict2)
     newDict = {}
@@ -240,7 +272,7 @@ def randomGuesser(wordDict, guessNum): # Guess random words that are valid based
 
 def getHighestRanking(wordDict):
     wordList = sorted(wordDict.items(), key=lambda x:x[1]) # Sort the dictionary (converts it to a list)
-    updatedWordList = wordList.copy()
+    updatedWordList = deepcopy(wordList)
     i = 0
     # for word in reversed(updatedWordList):
     #     if i == 10:
@@ -262,7 +294,7 @@ def getAverageRanking(wordDict):
 
 def getLowestRanking(wordDict):
     wordList = sorted(wordDict.items(), key=lambda x:x[1]) # Sort the dictionary (converts it to a list)
-    updatedWordList = wordList.copy()
+    updatedWordList = deepcopy(wordList)
     for wordTuple in wordList:
         updatedWordList.remove(wordTuple) # Remove this word from the list
         if isValid(wordTuple[0].lower()): # and not hasRepeatedLetters(wordTuple[0].lower()) and not lettersAlreadyGuessed(wordTuple[0].lower())
@@ -355,9 +387,32 @@ def useHybridEntropyAndNoKnownLettersForSecond(wordDict, guessNum):
         return getHighestRanking(wordDict)
 
 
-def useHighestNumPruned(wordDict, guessNum):
-    word = ""
-    return wordDict, word
+def useHighestNumPruned(wordDict, guessNum): # Find the guess that will prune the most words from our wordDict (O(n^3)!!!)
+    global stateSpace
+    wordPruningMost = ""
+    highestAverage = 0
+    for curWord in wordDict: # Iterate through every word still in our possible words dictionary
+        # print("Current word:", curWord)
+        totalNumPruned = 0
+        for targetWord in wordDict: # Iterate through every other word in the possible words dictionary
+            stateSpaceCopy = deepcopy(stateSpace) # Deep copy state space to not edit the global version
+            wordDictCopy = deepcopy(wordDict) # Deep copy word dict to not edit the global version
+            if targetWord == curWord: # Skip same word as curWord
+                continue
+            resultString = compare(targetWord, curWord) # Find result of guessing curWord when the actual word is targetWord
+            stateSpaceCopy = updateLocalStateSpace(stateSpaceCopy, curWord, resultString) # Update the state space locally based on result
+            origSize = len(wordDictCopy) # Get size of our word dictionary before pruning
+            wordDictCopy = updateWordDict(wordDictCopy, stateSpaceCopy, True) # Prune the word dictionary
+            finalSize = len(wordDictCopy) # Get size of our word dictionary after pruning
+            totalNumPruned += (origSize - finalSize) # Calculate number of pruned words if targetWord is the target word        
+        averagePruned = totalNumPruned / (len(wordDict) - 1) # Calculate the average pruned words using curWord as our guess
+        print("Number of words pruned with " + curWord + ": " + str(averagePruned))
+        if averagePruned > highestAverage: # Update our highest average and the word pruning the most
+            highestAverage = averagePruned
+            wordPruningMost = curWord
+    print("Word pruning most:", wordPruningMost)
+
+    return wordDict, wordPruningMost
 
 
 def runStrategy (strategy, strategyName, iterations):
@@ -406,7 +461,7 @@ def main():
     # runStrategy(useAverageEntropyToGuess, "AverageEntropyGuesser", 500)
     # runStrategy(useHybridEntropyAndStateSpaceRanking, "HybridEntropyAndStateSpaceGuesser", 500)
     # runStrategy(useHybridEntropyAndNoKnownLettersForSecond, "Hybrid Entropy And State Space And No Known Letters For Second Guess", 500)
-    runStrategy(useHighestNumPruned, "Guess Words that Prune the Most Other Words", 50)
+    runStrategy(useHighestNumPruned, "Guess Words that Prune the Most Other Words", 1)
 
 if __name__ == '__main__':
     main()
