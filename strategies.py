@@ -122,6 +122,8 @@ def updateRanking(wordDict): # Function to call the correct ranking function
         return updateEntropyRanking(wordDict)
     if (rankingType == 4):
         return updateStateSpaceAndEntropyRanking(wordDict)
+    if (rankingType == 5):
+        return wordDict
 
 def updateWordDict(wordDict): # Delete words from the word dictionary with letters that are in invalid spots
     dict_copy = wordDict.copy()
@@ -352,6 +354,12 @@ def useHybridEntropyAndNoKnownLettersForSecond(wordDict, guessNum):
     else:
         return getHighestRanking(wordDict)
 
+
+def useHighestNumPruned(wordDict, guessNum):
+    word = ""
+    return wordDict, word
+
+
 def runStrategy (strategy, strategyName, iterations):
     global rankingType
     if strategy == randomGuesser:
@@ -364,6 +372,8 @@ def runStrategy (strategy, strategyName, iterations):
         rankingType = 3
     elif strategy == useHybridEntropyAndStateSpaceRanking or strategy == useHybridEntropyAndNoKnownLettersForSecond:
         rankingType = 4
+    elif strategy == useHighestNumPruned:
+        rankingType = 5
     print("Running", strategyName, "Algorithm with", iterations, "game iterations. This may take a while...")
     tries = 0
     startTime = time.perf_counter()
@@ -386,17 +396,17 @@ def runStrategy (strategy, strategyName, iterations):
 
 def main():
     # runStrategy(randomGuesser, "RandomGuesser", 100)
-    runStrategy(useNoKnownLettersForSecondGuess, "Word with No Guessed Letters for 2nd Guess", 500)
-    runStrategy(useNoKnownLettersForSecondAndThirdGuess, "Word with No Guessed Letters for 2nd & 3rd Guess", 500)
-    runStrategy(useLowestScore2Guess, "Lowest Score for 2nd Guess", 500)
-    runStrategy(useLowestScore2and3Guess, "Lowest Score for 2nd & 3rd Guesses", 500)
-    runStrategy(useAverageScore2and3Guess, "Average Score for 2nd & 3rd Guesses", 500)
-    runStrategy(useLettersInIncorrectSpots, "Guess Words with letters not in correct spot for 2nd & 3rd Guesses", 500)
-    runStrategy(useAverageFrequencyToGuess, "AverageFrequencyGuesser", 500)
-    runStrategy(useAverageEntropyToGuess, "AverageEntropyGuesser", 500)
-    runStrategy(useHybridEntropyAndStateSpaceRanking, "HybridEntropyAndStateSpaceGuesser", 500)
-    runStrategy(useHybridEntropyAndNoKnownLettersForSecond, "Hybrid Entropy And State Space And No Known Letters For Second Guess", 500)
-
+    # runStrategy(useNoKnownLettersForSecondGuess, "Word with No Guessed Letters for 2nd Guess", 500)
+    # runStrategy(useNoKnownLettersForSecondAndThirdGuess, "Word with No Guessed Letters for 2nd & 3rd Guess", 500)
+    # runStrategy(useLowestScore2Guess, "Lowest Score for 2nd Guess", 500)
+    # runStrategy(useLowestScore2and3Guess, "Lowest Score for 2nd & 3rd Guesses", 500)
+    # runStrategy(useAverageScore2and3Guess, "Average Score for 2nd & 3rd Guesses", 500)
+    # runStrategy(useLettersInIncorrectSpots, "Guess Words with letters not in correct spot for 2nd & 3rd Guesses", 500)
+    # runStrategy(useAverageFrequencyToGuess, "AverageFrequencyGuesser", 500)
+    # runStrategy(useAverageEntropyToGuess, "AverageEntropyGuesser", 500)
+    # runStrategy(useHybridEntropyAndStateSpaceRanking, "HybridEntropyAndStateSpaceGuesser", 500)
+    # runStrategy(useHybridEntropyAndNoKnownLettersForSecond, "Hybrid Entropy And State Space And No Known Letters For Second Guess", 500)
+    runStrategy(useHighestNumPruned, "Guess Words that Prune the Most Other Words", 50)
 
 if __name__ == '__main__':
     main()
