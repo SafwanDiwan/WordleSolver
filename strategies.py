@@ -111,6 +111,7 @@ def playGame(wordGen):
 
 def updateRanking(wordDict): # Function to call the correct ranking function
     global rankingType
+    wordDict = updateWordDict(wordDict)
     if (rankingType == 0):
         return wordDict
     if (rankingType == 1):
@@ -122,7 +123,18 @@ def updateRanking(wordDict): # Function to call the correct ranking function
     if (rankingType == 4):
         return updateStateSpaceAndEntropyRanking(wordDict)
 
-def updateStateSpaceRanking(wordDict): # Update ranking (0 if letter not in word, 1 if in word but in incorrect position, 2 if in word and correct position)
+def updateWordDict(wordDict): # Delete words from the word dictionary with letters that are in invalid spots
+    dict_copy = wordDict.copy()
+    for word in dict_copy.keys():
+        wordIndex = 1
+        for letter in word:
+            if stateSpace.get(letter.lower())[wordIndex] == 0:
+                del wordDict[word]
+                break
+            wordIndex += 1
+    return wordDict
+
+def updateStateSpaceRanking(wordDict): # Update ranking (0 if letter not in word or not guessed yet, 1 if in word but in incorrect position, 2 if in word and correct position)
     global stateSpace
     for word in wordDict:
         ranking = 0
@@ -131,25 +143,31 @@ def updateStateSpaceRanking(wordDict): # Update ranking (0 if letter not in word
             dupStr = word.split(letter)
             if letter not in dupStr:
                 letterState = stateSpace.get(letter.lower())
-                ranking += letterState[position]
-        position += 1
+                if letterState[0] == 1:
+                    ranking += letterState[position]
+            position += 1
         wordDict.update({word : (ranking / 10)})
     return wordDict
 
-def updateFrequencyRanking(wordDict):
+def updateLetterFreq(wordDict):
     global letterFreq
-    resetLetterFreq()
     for word in wordDict: # Updates the letterFreq dictionary with updated frequency values
         position = 0
         for letter in word:
             letter = letter.lower()
             frequencyList = letterFreq.get(letter)
             dupStr = word.split(letter)
-            if frequencyList != None and (letter not in dupStr):
+            if frequencyList != None and not (letter in dupStr):
                 frequency = frequencyList[position] + 1
                 frequencyList[position] = frequency
                 letterFreq.update({letter : frequencyList})
             position += 1
+    return
+
+def updateFrequencyRanking(wordDict):
+    global letterFreq
+    resetLetterFreq()
+    updateLetterFreq(wordDict)
     for word in wordDict:
         ranking = 0
         position = 0
@@ -163,20 +181,10 @@ def updateFrequencyRanking(wordDict):
 def updateEntropyRanking(wordDict):
     global letterFreq # Use letterFreq dictionary for entropy too!
     resetLetterFreq()
-    for word in wordDict: # Updates the letterFreq dictionary with updated frequency values
-        position = 0
-        for letter in word:
-            letter = letter.lower()
-            frequencyList = letterFreq.get(letter)
-            dupStr = word.split(letter)
-            if frequencyList != None and not (letter in dupStr):
-                frequency = frequencyList[position] + 1
-                frequencyList[position] = frequency
-                letterFreq.update({letter : frequencyList})
-            position += 1
+    updateLetterFreq(wordDict)
     for letter in letterFreq:
         frequencyList = letterFreq.get(letter)
-        frequencyList[:] = [x / len(wordDict) for x in frequencyList]
+        frequencyList[:] = [x / (len(wordDict) + 1) for x in frequencyList]
     for word in wordDict:
         ranking = 0
         position = 0
@@ -185,6 +193,7 @@ def updateEntropyRanking(wordDict):
             frequencyList = letterFreq.get(letter)
             ranking += frequencyList[position] * (1 - frequencyList[position])
         wordDict.update({word : ranking})
+    # print(letterFreq)
     return wordDict
 
 def updateStateSpaceAndEntropyRanking(wordDict):
@@ -230,6 +239,12 @@ def randomGuesser(wordDict, guessNum): # Guess random words that are valid based
 def getHighestRanking(wordDict):
     wordList = sorted(wordDict.items(), key=lambda x:x[1]) # Sort the dictionary (converts it to a list)
     updatedWordList = wordList.copy()
+    i = 0
+    # for word in reversed(updatedWordList):
+    #     if i == 10:
+    #         break
+    #     print(word)
+    #     i += 1
     for wordTuple in reversed(wordList): # Get highest score words
         updatedWordList.remove(wordTuple)
         if isValid(wordTuple[0].lower()):
@@ -238,18 +253,59 @@ def getHighestRanking(wordDict):
 def getAverageRanking(wordDict):
     wordList = sorted(wordDict.items(), key=lambda x:x[1]) # Sort the dictionary (converts it to a list)
     while True:
-            word = wordList[int(len(wordList) / 2)][0] # Get the word with the average score
-            wordList.pop(int(len(wordList) / 2)) # Remove this word from the list
-            if isValid(word.lower()):
-                return dict(wordList), word # Cast the sorted list to a dictionary and also return the next guess
+        word = wordList[int(len(wordList) / 2)][0] # Get the word with the average score
+        wordList.pop(int(len(wordList) / 2)) # Remove this word from the list
+        if isValid(word.lower()):
+            return dict(wordList), word # Cast the sorted list to a dictionary and also return the next guess
 
 def getLowestRanking(wordDict):
     wordList = sorted(wordDict.items(), key=lambda x:x[1]) # Sort the dictionary (converts it to a list)
     updatedWordList = wordList.copy()
     for wordTuple in wordList:
-            updatedWordList.remove(wordTuple) # Remove this word from the list
-            if isValid(wordTuple[0].lower()):
-                return dict(updatedWordList), wordTuple[0] # Cast the sorted list to a dictionary and also return the next guess
+        updatedWordList.remove(wordTuple) # Remove this word from the list
+        if isValid(wordTuple[0].lower()): # and not hasRepeatedLetters(wordTuple[0].lower()) and not lettersAlreadyGuessed(wordTuple[0].lower())
+            return dict(updatedWordList), wordTuple[0] # Cast the sorted list to a dictionary and also return the next guess
+
+def getWordWithNoGuessedLetters(wordDict): # Gets a word whose letters have not been guessed yet
+    wordList = create_wordlist(GUESSWORD_LIST_FNAME, length=WORDLEN)
+    for word in wordList:
+        if not hasRepeatedLetters(word.lower()) and not lettersAlreadyGuessed(word.lower()):
+            if word in wordDict:
+                del wordDict[word]
+            return wordDict, word
+
+def hasRepeatedLetters(word): # Checks whether the inputted word has repeated letters
+    visited = []
+    for letter in word:
+        if letter in visited:
+            return True
+        visited.append(letter)
+    return False
+
+def lettersAlreadyGuessed(word): # Checks if any of the letters in the inputted word have already been guessed
+    global stateSpace
+    for letter in word:
+        if stateSpace.get(letter)[0] == 1:
+            return True
+    return False
+
+def useNoKnownLettersForSecondGuess(wordDict, guessNum):
+    if guessNum == 1: # If the second guess...
+        return getWordWithNoGuessedLetters(wordDict)
+    else: 
+        return getHighestRanking(wordDict)
+
+def useNoKnownLettersForSecondAndThirdGuess(wordDict, guessNum):
+    if guessNum == 1 or guessNum == 2: # If the second or the third guess...
+        return getWordWithNoGuessedLetters(wordDict)
+    else:
+        return getHighestRanking(wordDict)
+
+def useLowestScore2Guess(wordDict, guessNum):  
+    if guessNum == 1: # If the second guess...
+        return getLowestRanking(wordDict)
+    else: 
+        return getHighestRanking(wordDict)
 
 def useLowestScore2and3Guess(wordDict, guessNum):  
     if guessNum == 1 or guessNum == 2: # If the second or the third guess...
@@ -290,18 +346,23 @@ def useAverageEntropyToGuess(wordDict, guessNum):
 def useHybridEntropyAndStateSpaceRanking(wordDict, guessNum):
     return getHighestRanking(wordDict)
 
+def useHybridEntropyAndNoKnownLettersForSecond(wordDict, guessNum):
+    if guessNum == 1:
+        return getWordWithNoGuessedLetters(wordDict)
+    else:
+        return getHighestRanking(wordDict)
 
 def runStrategy (strategy, strategyName, iterations):
     global rankingType
     if strategy == randomGuesser:
         rankingType = 0
-    if strategy == useLowestScore2and3Guess or strategy == useAverageScore2and3Guess or strategy == useLettersInIncorrectSpots:
+    if strategy == useNoKnownLettersForSecondGuess or strategy == useNoKnownLettersForSecondAndThirdGuess or strategy == useLowestScore2and3Guess or strategy == useAverageScore2and3Guess or strategy == useLettersInIncorrectSpots:
         rankingType = 1
     elif strategy == useAverageFrequencyToGuess:
         rankingType = 2
     elif strategy == useAverageEntropyToGuess:
         rankingType = 3
-    elif strategy == useHybridEntropyAndStateSpaceRanking:
+    elif strategy == useHybridEntropyAndStateSpaceRanking or strategy == useHybridEntropyAndNoKnownLettersForSecond:
         rankingType = 4
     print("Running", strategyName, "Algorithm with", iterations, "game iterations. This may take a while...")
     tries = 0
@@ -324,13 +385,18 @@ def runStrategy (strategy, strategyName, iterations):
     print("    This means each game took, on average, " + str(totalTime / iterations) + " secs to run")
 
 def main():
-    runStrategy(randomGuesser, "RandomGuesser", 100)
-    runStrategy(useLowestScore2and3Guess, "Lowest Score for 2nd & 3rd Guesses", 100)
-    runStrategy(useAverageScore2and3Guess, "Average Score for 2nd & 3rd Guesses", 100)
-    runStrategy(useLettersInIncorrectSpots, "Guess Words with letters not in correct spot for 2nd & 3rd Guesses", 100)
-    runStrategy(useAverageFrequencyToGuess, "AverageFrequencyGuesser", 100)
-    runStrategy(useAverageEntropyToGuess, "AverageEntropyGuesser", 100)
-    runStrategy(useHybridEntropyAndStateSpaceRanking, "HybridEntropyAndStateSpaceGuesser", 100)
+    # runStrategy(randomGuesser, "RandomGuesser", 100)
+    runStrategy(useNoKnownLettersForSecondGuess, "Word with No Guessed Letters for 2nd Guess", 500)
+    runStrategy(useNoKnownLettersForSecondAndThirdGuess, "Word with No Guessed Letters for 2nd & 3rd Guess", 500)
+    runStrategy(useLowestScore2Guess, "Lowest Score for 2nd Guess", 500)
+    runStrategy(useLowestScore2and3Guess, "Lowest Score for 2nd & 3rd Guesses", 500)
+    runStrategy(useAverageScore2and3Guess, "Average Score for 2nd & 3rd Guesses", 500)
+    runStrategy(useLettersInIncorrectSpots, "Guess Words with letters not in correct spot for 2nd & 3rd Guesses", 500)
+    runStrategy(useAverageFrequencyToGuess, "AverageFrequencyGuesser", 500)
+    runStrategy(useAverageEntropyToGuess, "AverageEntropyGuesser", 500)
+    runStrategy(useHybridEntropyAndStateSpaceRanking, "HybridEntropyAndStateSpaceGuesser", 500)
+    runStrategy(useHybridEntropyAndNoKnownLettersForSecond, "Hybrid Entropy And State Space And No Known Letters For Second Guess", 500)
+
 
 if __name__ == '__main__':
     main()
