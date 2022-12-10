@@ -95,7 +95,7 @@ def playGame(wordGen):
 
     # select a random word to be the Wordle!
     WORD = random.choice(GAMEWORD_WORDLIST)
-    print("Correct Word:", WORD)
+    # print("Correct Word:", WORD)
     # WORD = "WHARF"
     # GAME_WORD_LENGTH = len(WORD)
 
@@ -121,13 +121,13 @@ def playGame(wordGen):
             NUM_GUESSES += 1
             # display the guess when compared against the game word
             result = compare(expected=WORD, guess=GUESS)
-            print(f"Guess for step {NUM_GUESSES}: {GUESS}")
+            # print(f"Guess for step {NUM_GUESSES}: {GUESS}")
             updateStateSpace(GUESS.lower(), result)
             wordDict = updateRanking(wordDict)
             # print(" ".join(result))
 
             if WORD == GUESS:
-                print(f"You won! It took you {NUM_GUESSES} guesses. The word was {WORD.upper()}")
+                # print(f"You won! It took you {NUM_GUESSES} guesses. The word was {WORD.upper()}")
                 break
     except KeyboardInterrupt:
         print(f"""
@@ -406,11 +406,11 @@ def useHighestNumPruned(wordDict, guessNum): # Find the guess that will prune th
             finalSize = len(wordDictCopy) # Get size of our word dictionary after pruning
             totalNumPruned += (origSize - finalSize) # Calculate number of pruned words if targetWord is the target word        
         averagePruned = totalNumPruned / (len(wordDict) - 1) # Calculate the average pruned words using curWord as our guess
-        print("Number of words pruned with " + curWord + ": " + str(averagePruned))
+        # print("Number of words pruned with " + curWord + ": " + str(averagePruned))
         if averagePruned > highestAverage: # Update our highest average and the word pruning the most
             highestAverage = averagePruned
             wordPruningMost = curWord
-    print("Word pruning most:", wordPruningMost)
+    # print("Word pruning most:", wordPruningMost)
 
     return wordDict, wordPruningMost
 
@@ -450,18 +450,18 @@ def runStrategy (strategy, strategyName, iterations):
     print("    This means each game took, on average, " + str(totalTime / iterations) + " secs to run")
 
 def main():
-    # runStrategy(randomGuesser, "RandomGuesser", 100)
-    # runStrategy(useNoKnownLettersForSecondGuess, "Word with No Guessed Letters for 2nd Guess", 500)
-    # runStrategy(useNoKnownLettersForSecondAndThirdGuess, "Word with No Guessed Letters for 2nd & 3rd Guess", 500)
-    # runStrategy(useLowestScore2Guess, "Lowest Score for 2nd Guess", 500)
-    # runStrategy(useLowestScore2and3Guess, "Lowest Score for 2nd & 3rd Guesses", 500)
-    # runStrategy(useAverageScore2and3Guess, "Average Score for 2nd & 3rd Guesses", 500)
-    # runStrategy(useLettersInIncorrectSpots, "Guess Words with letters not in correct spot for 2nd & 3rd Guesses", 500)
-    # runStrategy(useAverageFrequencyToGuess, "AverageFrequencyGuesser", 500)
-    # runStrategy(useAverageEntropyToGuess, "AverageEntropyGuesser", 500)
-    # runStrategy(useHybridEntropyAndStateSpaceRanking, "HybridEntropyAndStateSpaceGuesser", 500)
-    # runStrategy(useHybridEntropyAndNoKnownLettersForSecond, "Hybrid Entropy And State Space And No Known Letters For Second Guess", 500)
-    runStrategy(useHighestNumPruned, "Guess Words that Prune the Most Other Words", 1)
+    runStrategy(randomGuesser, "RandomGuesser", 100)
+    runStrategy(useNoKnownLettersForSecondGuess, "Word with No Guessed Letters for 2nd Guess", 500)
+    runStrategy(useNoKnownLettersForSecondAndThirdGuess, "Word with No Guessed Letters for 2nd & 3rd Guess", 500)
+    runStrategy(useLowestScore2Guess, "Lowest Score for 2nd Guess", 500)
+    runStrategy(useLowestScore2and3Guess, "Lowest Score for 2nd & 3rd Guesses", 500)
+    runStrategy(useAverageScore2and3Guess, "Average Score for 2nd & 3rd Guesses", 500)
+    runStrategy(useLettersInIncorrectSpots, "Guess Words with letters not in correct spot for 2nd & 3rd Guesses", 500)
+    runStrategy(useAverageFrequencyToGuess, "AverageFrequencyGuesser", 500)
+    runStrategy(useAverageEntropyToGuess, "AverageEntropyGuesser", 500)
+    runStrategy(useHybridEntropyAndStateSpaceRanking, "HybridEntropyAndStateSpaceGuesser", 500)
+    runStrategy(useHybridEntropyAndNoKnownLettersForSecond, "Hybrid Entropy And State Space And No Known Letters For Second Guess", 500)
+    # runStrategy(useHighestNumPruned, "Guess Words that Prune the Most Other Words", 1)
 
 if __name__ == '__main__':
     main()
