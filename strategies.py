@@ -96,7 +96,7 @@ def playGame(wordGen):
 
     # select a random word to be the Wordle!
     WORD = random.choice(GAMEWORD_WORDLIST)
-    print("Correct Word:", WORD)
+    # print("Correct Word:", WORD)
     # WORD = "WHARF"
     # GAME_WORD_LENGTH = len(WORD)
 
@@ -122,13 +122,13 @@ def playGame(wordGen):
             NUM_GUESSES += 1
             # display the guess when compared against the game word
             result = compare(expected=WORD, guess=GUESS)
-            print(f"Guess for step {NUM_GUESSES}: {GUESS}")
+            # print(f"Guess for step {NUM_GUESSES}: {GUESS}")
             updateStateSpace(GUESS.lower(), result)
             wordDict = updateRanking(wordDict)
             # print(" ".join(result))
 
             if WORD.upper() == GUESS.upper():
-                print(f"You won! It took you {NUM_GUESSES} guesses. The word was {WORD.upper()}")
+                # print(f"You won! It took you {NUM_GUESSES} guesses. The word was {WORD.upper()}")
                 break
     except KeyboardInterrupt:
         print(f"""
@@ -187,7 +187,7 @@ def updateStateSpaceRanking(wordDict): # Update ranking (0 if letter not in word
     for word in reversed(sorted(wordDict.items(), key=lambda x:x[1])):
         if i == 10:
             break
-        print(word)
+        # print(word)
         i += 1
     return wordDict
 
@@ -195,14 +195,16 @@ def updateLetterFreq(wordDict):
     global letterFreq
     for word in wordDict: # Updates the letterFreq dictionary with updated frequency values
         position = 0
+        visited = []
         for letter in word:
             letter = letter.lower()
             frequencyList = letterFreq.get(letter)
             dupStr = word.split(letter)
-            if frequencyList != None and not (letter in dupStr):
+            if frequencyList != None and letter not in visited:
                 frequency = frequencyList[position] + 1
                 frequencyList[position] = frequency
                 letterFreq.update({letter : frequencyList})
+            visited.append(letter)
             position += 1
     return
 
@@ -478,11 +480,11 @@ def main():
     # runStrategy(useLowestScore2and3Guess, "Lowest Score for 2nd & 3rd Guesses", 500)
     # runStrategy(useAverageScore2and3Guess, "Average Score for 2nd & 3rd Guesses", 500)
     # runStrategy(useLettersInIncorrectSpots, "Guess Words with letters not in correct spot for 2nd & 3rd Guesses", 500)
-    # runStrategy(useAverageFrequencyToGuess, "AverageFrequencyGuesser", 500)
-    # runStrategy(useAverageEntropyToGuess, "AverageEntropyGuesser", 500)
-    # runStrategy(useHybridEntropyAndStateSpaceRanking, "HybridEntropyAndStateSpaceGuesser", 500)
-    # runStrategy(useHybridEntropyAndNoKnownLettersForSecond, "Hybrid Entropy And State Space And No Known Letters For Second Guess", 500)
-    runStrategy(useHighestNumPruned, "Guess Words that Prune the Most Other Words", 20)
+    runStrategy(useAverageFrequencyToGuess, "AverageFrequencyGuesser", 500)
+    runStrategy(useAverageEntropyToGuess, "AverageEntropyGuesser", 500)
+    runStrategy(useHybridEntropyAndStateSpaceRanking, "HybridEntropyAndStateSpaceGuesser", 500)
+    runStrategy(useHybridEntropyAndNoKnownLettersForSecond, "Hybrid Entropy And State Space And No Known Letters For Second Guess", 500)
+    # runStrategy(useHighestNumPruned, "Guess Words that Prune the Most Other Words", 20)
 
 if __name__ == '__main__':
     main()
