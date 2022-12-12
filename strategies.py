@@ -401,8 +401,7 @@ def useHighestNumPruned(wordDict, guessNum): # Find the guess that will prune th
     wordPruningMost = ""
     highestAverage = -1
     iterator = 0 # Count number of words read from wordDict, stop when at K_TOP_WORDS
-
-    # NEED TO SORT WORD_DICT!!
+    
     wordDictCopy = deepcopy(wordDict) # Deep copy word dict to not edit the global version
     wordList = reversed(sorted(wordDictCopy.items(), key=lambda x:x[1])) # Sort the dictionary (converts into an iterable list)
 
