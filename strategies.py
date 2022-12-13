@@ -356,11 +356,14 @@ def useLowestScore2and3Guess(wordDict, guessNum):
     else: 
         return getHighestRanking(wordDict)
 
-def useAverageScore2and3Guess(wordDict, guessNum):      
-    if guessNum == 1 or guessNum == 2: # If the second or the third guess...
+def useAverageScore2Guess(wordDict, guessNum):      
+    if guessNum == 1: # If the second or the third guess...
         return getAverageRanking(wordDict)
     else: 
         return getHighestRanking(wordDict)
+
+def useHighScore2Guess(wordDict, guessNum):      
+    return getHighestRanking(wordDict)
 
 def useLettersInIncorrectSpots(wordDict, guessNum):
     global stateSpace
@@ -444,7 +447,7 @@ def runStrategy (strategy, strategyName, iterations):
     global rankingType
     if strategy == randomGuesser:
         rankingType = 0
-    if strategy == useNoKnownLettersForSecondGuess or strategy == useNoKnownLettersForSecondAndThirdGuess or strategy == useLowestScore2and3Guess or strategy == useAverageScore2and3Guess or strategy == useLettersInIncorrectSpots or strategy == useHighestNumPruned:
+    if strategy == useNoKnownLettersForSecondGuess or strategy == useNoKnownLettersForSecondAndThirdGuess or strategy == useLowestScore2and3Guess or strategy == useAverageScore2Guess or strategy == useLettersInIncorrectSpots or strategy == useHighestNumPruned or strategy == useHighScore2Guess:
         rankingType = 1
     elif strategy == useAverageFrequencyToGuess:
         rankingType = 2
@@ -473,18 +476,19 @@ def runStrategy (strategy, strategyName, iterations):
     print("    This means each game took, on average, " + str(totalTime / iterations) + " secs to run")
 
 def main():
-    # runStrategy(randomGuesser, "RandomGuesser", 100)
+    runStrategy(randomGuesser, "RandomGuesser", 500)
     # runStrategy(useNoKnownLettersForSecondGuess, "Word with No Guessed Letters for 2nd Guess", 500)
     # runStrategy(useNoKnownLettersForSecondAndThirdGuess, "Word with No Guessed Letters for 2nd & 3rd Guess", 500)
-    # runStrategy(useLowestScore2Guess, "Lowest Score for 2nd Guess", 500)
+    # runStrategy(useLowestScore2Guess, "Lowest Score for 2nd Guess", 500) #LPRG
     # runStrategy(useLowestScore2and3Guess, "Lowest Score for 2nd & 3rd Guesses", 500)
-    # runStrategy(useAverageScore2and3Guess, "Average Score for 2nd & 3rd Guesses", 500)
-    # runStrategy(useLettersInIncorrectSpots, "Guess Words with letters not in correct spot for 2nd & 3rd Guesses", 500)
-    runStrategy(useAverageFrequencyToGuess, "AverageFrequencyGuesser", 500)
-    runStrategy(useAverageEntropyToGuess, "AverageEntropyGuesser", 500)
+    # runStrategy(useAverageScore2Guess, "Average Score for 2nd Guess", 500) #APRG
+    # runStrategy(useHighScore2Guess, "High Score for 2nd Guess", 500) #HPRG
+    # # runStrategy(useLettersInIncorrectSpots, "Guess Words with letters not in correct spot for 2nd & 3rd Guesses", 500)
+    # runStrategy(useAverageFrequencyToGuess, "AverageFrequencyGuesser", 500)
+    # runStrategy(useAverageEntropyToGuess, "AverageEntropyGuesser", 500)
     runStrategy(useHybridEntropyAndStateSpaceRanking, "HybridEntropyAndStateSpaceGuesser", 500)
     runStrategy(useHybridEntropyAndNoKnownLettersForSecond, "Hybrid Entropy And State Space And No Known Letters For Second Guess", 500)
-    # runStrategy(useHighestNumPruned, "Guess Words that Prune the Most Other Words", 20)
+    # # runStrategy(useHighestNumPruned, "Guess Words that Prune the Most Other Words", 20)
 
 if __name__ == '__main__':
     main()
