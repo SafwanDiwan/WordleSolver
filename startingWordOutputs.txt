@@ -32,4 +32,52 @@ Running Average Score for 2nd & 3rd Guesses Algorithm with 100 game iterations. 
 Running Guess Words with letters not in correct spot for 2nd & 3rd Guesses Algorithm with 100 game iterations. This may take a while...
     Average Guesses for Guess Words with letters not in correct spot for 2nd & 3rd Guesses: 6.14
     Time taken for algorithm to run: 56.9548359 secs
-    This means each game took, on average, 0.569548359 secs to run
+    This means each game took, on average, 0.569548359 secs to runPS C:\Users\skydo\OneDrive\CSCI\CSCI4511W\WordleSolver> & C:/Python310/python.exe c:/Users/skydo/OneDrive/CSCI/CSCI4511W/WordleSolver/strategies.py
+Running RandomGuesser Algorithm with 2000 game iterations. This may take a while...
+    Average Guesses for RandomGuesser: 5.853
+    Number of Games with guess count under or equal to 6: 1420. With guess count over 6: 580   
+    RandomGuesser won the game 71.0% of the time!
+    Time taken for algorithm to run: 49.643530099998316 secs
+    This means each game took, on average, 0.024821765049999157 secs to run
+Running High Score for 2nd+ Guess Algorithm with 2000 game iterations. This may take a while...
+    Average Guesses for High Score for 2nd+ Guess: 4.676
+    Number of Games with guess count under or equal to 6: 1827. With guess count over 6: 173    
+    High Score for 2nd+ Guess won the game 91.35% of the time!
+    Time taken for algorithm to run: 58.0172934000002 secs
+    This means each game took, on average, 0.0290086467000001 secs to run
+Running Lowest Score for 2nd Guess Algorithm with 2000 game iterations. This may take a while...
+    Average Guesses for Lowest Score for 2nd Guess: 5.05
+    Number of Games with guess count under or equal to 6: 1744. With guess count over 6: 256     
+    Lowest Score for 2nd Guess won the game 87.2% of the time!
+    Time taken for algorithm to run: 60.732493800001976 secs
+    This means each game took, on average, 0.030366246900000986 secs to run
+Running Average Score for 2nd Guess Algorithm with 2000 game iterations. This may take a while...
+    Average Guesses for Average Score for 2nd Guess: 4.7765
+    Number of Games with guess count under or equal to 6: 1799. With guess count over 6: 201
+    Average Score for 2nd Guess won the game 89.95% of the time!
+    Time taken for algorithm to run: 54.15481240000008 secs
+    This means each game took, on average, 0.027077406200000043 secs to run
+Running Word with No Guessed Letters for 2nd Guess Algorithm with 500 game iterations. This may take a while...
+    Average Guesses for Word with No Guessed Letters for 2nd Guess: 4.56
+    Number of Games with guess count under or equal to 6: 469. With guess count over 6: 31 
+    Word with No Guessed Letters for 2nd Guess won the game 93.8% of the time!
+    Time taken for algorithm to run: 15.612609600000724 secs
+    This means each game took, on average, 0.031225219200001448 secs to run
+Running AverageEntropyGuesser Algorithm with 2000 game iterations. This may take a while...
+    Average Guesses for AverageEntropyGuesser: 6.0095
+    Number of Games with guess count under or equal to 6: 1325. With guess count over 6: 675
+    AverageEntropyGuesser won the game 66.25% of the time!
+    Time taken for algorithm to run: 66.3238459000022 secs
+    This means each game took, on average, 0.0331619229500011 secs to run
+Running HybridEntropyAndStateSpaceGuesser Algorithm with 2000 game iterations. This may take a while...
+    Average Guesses for HybridEntropyAndStateSpaceGuesser: 5.0
+    Number of Games with guess count under or equal to 6: 1734. With guess count over 6: 266
+    HybridEntropyAndStateSpaceGuesser won the game 86.7% of the time!
+    Time taken for algorithm to run: 71.78240770000048 secs
+    This means each game took, on average, 0.03589120385000024 secs to run
+Running Hybrid Entropy And State Space And No Known Letters For Second Guess Algorithm with 2000 game iterations. This may take a while...
+    Average Guesses for Hybrid Entropy And State Space And No Known Letters For Second Guess: 4.8205
+    Number of Games with guess count under or equal to 6: 1847. With guess count over 6: 153
+    Hybrid Entropy And State Space And No Known Letters For Second Guess won the game 92.35% of the time!      
+    Time taken for algorithm to run: 75.66882339999938 secs
+    This means each game took, on average, 0.03783441169999969 secs to run

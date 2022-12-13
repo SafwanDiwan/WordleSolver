@@ -386,8 +386,8 @@ def useLettersInIncorrectSpots(wordDict, guessNum):
 def useAverageFrequencyToGuess(wordDict, guessNum):
     return getAverageRanking(wordDict)
 
-def useAverageEntropyToGuess(wordDict, guessNum):
-    return getAverageRanking(wordDict)
+def useHighestEntropyToGuess(wordDict, guessNum):
+    return getHighestRanking(wordDict)
 
 def useHybridEntropyAndStateSpaceRanking(wordDict, guessNum):
     return getHighestRanking(wordDict)
@@ -412,7 +412,7 @@ def useHighestNumPruned(wordDict, guessNum): # Find the guess that will prune th
         curWord = curWord[0]
         if iterator == K_TOP_WORDS: # Read only the first K_TOP_WORDS FROM THE WORD_DICT
             break
-        print(str(iterator) + " - Current word:", curWord)
+        # print(str(iterator) + " - Current word:", curWord)
         totalNumPruned = 0
         wordListCopy = deepcopy(wordList) # Make a copy of the iterable wordList to not mess with iterator
         for targetWord in wordListCopy: # Iterate through every other word in the possible words dictionary
@@ -431,13 +431,13 @@ def useHighestNumPruned(wordDict, guessNum): # Find the guess that will prune th
             averagePruned = totalNumPruned
         else:    
             averagePruned = totalNumPruned / (len(wordDict) - 1) # Calculate the average pruned words using curWord as our guess
-        print("Number of words pruned with " + curWord + ": " + str(averagePruned))
+        # print("Number of words pruned with " + curWord + ": " + str(averagePruned))
         if averagePruned > highestAverage: # Update our highest average and the word pruning the most
             highestAverage = averagePruned
             wordPruningMost = curWord
         iterator += 1
 
-    print("Word pruning most:", wordPruningMost)
+    # print("Word pruning most:", wordPruningMost)
 
     return wordDict, wordPruningMost
 
@@ -450,7 +450,7 @@ def runStrategy (strategy, strategyName, iterations):
         rankingType = 1
     elif strategy == useAverageFrequencyToGuess:
         rankingType = 2
-    elif strategy == useAverageEntropyToGuess:
+    elif strategy == useHighestEntropyToGuess:
         rankingType = 3
     elif strategy == useHybridEntropyAndStateSpaceRanking or strategy == useHybridEntropyAndNoKnownLettersForSecond:
         rankingType = 4
@@ -475,19 +475,19 @@ def runStrategy (strategy, strategyName, iterations):
     print("    This means each game took, on average, " + str(totalTime / iterations) + " secs to run")
 
 def main():
-    runStrategy(randomGuesser, "RandomGuesser", 500)
-    # runStrategy(useNoKnownLettersForSecondGuess, "Word with No Guessed Letters for 2nd Guess", 500)
+    # runStrategy(randomGuesser, "RandomGuesser", 2000) #RG
     # runStrategy(useNoKnownLettersForSecondAndThirdGuess, "Word with No Guessed Letters for 2nd & 3rd Guess", 500)
-    # runStrategy(useLowestScore2Guess, "Lowest Score for 2nd Guess", 500) #LPRG
+    # runStrategy(useHighScore2Guess, "High Score for 2nd+ Guess", 2000) #HPRG
+    # runStrategy(useLowestScore2Guess, "Lowest Score for 2nd Guess", 2000) #LPRG
     # runStrategy(useLowestScore2and3Guess, "Lowest Score for 2nd & 3rd Guesses", 500)
-    # runStrategy(useAverageScore2Guess, "Average Score for 2nd Guess", 500) #APRG
-    # runStrategy(useHighScore2Guess, "High Score for 2nd Guess", 500) #HPRG
+    # runStrategy(useAverageScore2Guess, "Average Score for 2nd Guess", 2000) #APRG
+    # runStrategy(useNoKnownLettersForSecondGuess, "Word with No Guessed Letters for 2nd Guess", 500) #TPWG
     # # runStrategy(useLettersInIncorrectSpots, "Guess Words with letters not in correct spot for 2nd & 3rd Guesses", 500)
     # runStrategy(useAverageFrequencyToGuess, "AverageFrequencyGuesser", 500)
-    # runStrategy(useAverageEntropyToGuess, "AverageEntropyGuesser", 500)
-    runStrategy(useHybridEntropyAndStateSpaceRanking, "HybridEntropyAndStateSpaceGuesser", 500)
-    runStrategy(useHybridEntropyAndNoKnownLettersForSecond, "Hybrid Entropy And State Space And No Known Letters For Second Guess", 500)
-    # # runStrategy(useHighestNumPruned, "Guess Words that Prune the Most Other Words", 20)
+    # runStrategy(useHighestEntropyToGuess, "AverageEntropyGuesser", 2000) #ERG
+    # runStrategy(useHybridEntropyAndStateSpaceRanking, "HybridEntropyAndStateSpaceGuesser", 2000) #HEPG
+    # runStrategy(useHybridEntropyAndNoKnownLettersForSecond, "Hybrid Entropy And State Space And No Known Letters For Second Guess", 2000) #HETPG
+    runStrategy(useHighestNumPruned, "Guess Words that Prune the Most Other Words", 500) #MPG
 
 if __name__ == '__main__':
     main()
